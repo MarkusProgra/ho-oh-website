@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ho Oh Galaxy - Interactive Space Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Futura', sans-serif;
+            background: #000005;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #0a0a1a 0%, #000005 50%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        #start-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-title {
+            font-size: clamp(48px, 10vw, 80px);
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 40px rgba(248, 159, 68, 0.4));
+        }
+
+        .start-subtitle {
+            color: #8888aa;
+            font-size: 18px;
+            margin-bottom: 40px;
+            letter-spacing: 0.2em;
+        }
+
+        .start-btn {
+            padding: 20px 60px;
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 15px 40px rgba(248, 159, 68, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 60px rgba(248, 159, 68, 0.5);
+        }
+
+        .instructions {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            color: #666688;
+            font-size: 14px;
+            align-items: center;
+        }
+
+        .key-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .key {
+            width: 40px;
+            height: 40px;
+            background: rgba(248, 159, 68, 0.15);
+            border: 1px solid rgba(248, 159, 68, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #f89f44;
+            box-shadow: 0 0 15px rgba(248, 159, 68, 0.2);
+        }
+
+        /* HUD */
+        #hud {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+
+        #hud.active {
+            display: block;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+        }
+
+        #crosshair::before,
+        #crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(248, 159, 68, 0.6);
+        }
+
+        #crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 9px;
+            top: 0;
+        }
+
+        #crosshair::after {
+            width: 20px;
+            height: 2px;
+            top: 9px;
+            left: 0;
+        }
+
+        #zone-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(248, 159, 68, 0.3);
+            border-radius: 30px;
+            padding: 12px 30px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        #zone-name {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #f89f44;
+        }
+
+        #minimap-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 180px;
+            height: 180px;
+            background: rgba(10, 10, 10, 0.9);
+            border: 2px solid rgba(248, 159, 68, 0.4);
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        #minimap {
+            width: 100%;
+            height: 100%;
+        }
+
+        #altitude-indicator {
+            position: absolute;
+            bottom: 100px;
+            right: 220px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(248, 159, 68, 0.3);
+            border-radius: 16px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        #altitude-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #altitude-label {
+            font-size: 10px;
+            color: #8888aa;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        #speed-indicator {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(248, 159, 68, 0.3);
+            border-radius: 16px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        #speed-bar {
+            width: 100px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        #speed-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f89f44, #f15033);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        #speed-label {
+            font-size: 10px;
+            color: #8888aa;
+            text-transform: uppercase;
+            margin-top: 8px;
+            letter-spacing: 0.1em;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(248, 159, 68, 0.3);
+            border-radius: 16px;
+            padding: 15px 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        #score-value {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #score-label {
+            font-size: 11px;
+            color: #8888aa;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 5px;
+        }
+
+        #star-count {
+            color: #f89f44;
+            font-weight: 600;
+        }
+
+        #info-popup {
+            position: absolute;
+            max-width: 420px;
+            left: 50%;
+            top: 15%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid rgba(248, 159, 68, 0.4);
+            border-radius: 20px;
+            padding: 25px 30px;
+            opacity: 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+        }
+
+        #info-popup.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #info-popup h3 {
+            font-size: 26px;
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        #info-popup p {
+            color: #cccccc;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        #notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 10, 0.95);
+            border: 2px solid rgba(248, 159, 68, 0.5);
+            border-radius: 24px;
+            padding: 35px 60px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        #notification.show {
+            opacity: 1;
+        }
+
+        #notification h4 {
+            color: #f89f44;
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        #notification p {
+            color: #cccccc;
+        }
+
+        #controls-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.8);
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(248, 159, 68, 0.2);
+        }
+
+        .key-hint {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8888aa;
+            font-size: 12px;
+        }
+
+        /* Mobile Controls */
+        #mobile-controls {
+            display: none;
+        }
+
+        /* Landscape orientation prompt */
+        #landscape-prompt {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+        }
+
+        #landscape-prompt.active {
+            display: flex;
+        }
+
+        .prompt-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .prompt-title {
+            font-size: 24px;
+            color: #f89f44;
+            margin-bottom: 15px;
+            letter-spacing: 0.1em;
+        }
+
+        .prompt-text {
+            color: #8888aa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .prompt-btn {
+            margin-top: 25px;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Fullscreen button */
+        #fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(248, 159, 68, 0.3);
+            transition: all 0.3s ease;
+            z-index: 200;
+            display: none;
+        }
+
+        #fullscreen-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(248, 159, 68, 0.5);
+        }
+
+        #fullscreen-btn.active {
+            display: block;
+        }
+
+        /* Go to Web indicator in zone bar */
+        .go-to-web-indicator {
+            background: linear-gradient(135deg, #f89f44, #f15033) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .press-enter-hint {
+            font-size: 10px;
+            color: #f89f44;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-controls {
+                display: block;
+                pointer-events: auto;
+            }
+            #controls-hint {
+                display: none;
+            }
+            /* Hide altitude and velocity on mobile */
+            #altitude-indicator,
+            #speed-indicator {
+                display: none;
+            }
+            #minimap-container {
+                width: 90px;
+                height: 90px;
+                top: 10px;
+                right: 10px;
+            }
+            /* Movement joystick (left side) */
+            #joystick-zone {
+                position: absolute;
+                bottom: 80px;
+                left: 40px;
+                width: 120px;
+                height: 120px;
+                background: rgba(255,255,255,0.03);
+                border: 2px solid rgba(248, 159, 68, 0.3);
+                border-radius: 50%;
+                pointer-events: auto;
+            }
+            #joystick-knob {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #f89f44, #f15033);
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+            }
+            /* View joystick (right side, lower) */
+            #view-joystick-zone {
+                position: absolute;
+                bottom: 80px;
+                right: 40px;
+                width: 100px;
+                height: 100px;
+                background: rgba(255,255,255,0.03);
+                border: 2px solid rgba(157, 105, 206, 0.3);
+                border-radius: 50%;
+                pointer-events: auto;
+            }
+            #view-joystick-knob {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #9D69CE, #FFA2F0);
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+            }
+            /* Up/Down buttons */
+            #vertical-controls {
+                position: absolute;
+                bottom: 180px;
+                right: 55px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .vertical-btn {
+                width: 50px;
+                height: 50px;
+                background: rgba(255,255,255,0.1);
+                border: 2px solid rgba(248, 159, 68, 0.3);
+                border-radius: 50%;
+                color: #fff;
+                font-size: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                pointer-events: auto;
+                cursor: pointer;
+            }
+            .vertical-btn:active {
+                background: rgba(248, 159, 68, 0.3);
+            }
+            #mobile-actions {
+                position: absolute;
+                bottom: 250px;
+                right: 55px;
+            }
+            .mobile-btn {
+                width: 60px;
+                height: 60px;
+                background: rgba(255,255,255,0.1);
+                border: 2px solid rgba(248, 159, 68, 0.3);
+                border-radius: 50%;
+                color: #fff;
+                font-size: 22px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                pointer-events: auto;
+            }
+            /* Mobile zone indicator styling */
+            #zone-indicator {
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                max-width: 90%;
+            }
+            /* Show fullscreen button on mobile */
+            #fullscreen-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1 class="start-title">Ho Oh Galaxy</h1>
+        <p class="start-subtitle">A Cosmic Interactive Journey</p>
+        <button class="start-btn" id="start-btn">Enter Galaxy</button>
+        <div class="instructions">
+            <div class="key-row">
+                <span class="key">W</span><span class="key">S</span>
+                <span>Forward / Backward</span>
+            </div>
+            <div class="key-row">
+                <span class="key">A</span><span class="key">D</span>
+                <span>Strafe Left / Right</span>
+            </div>
+            <div class="key-row">
+                <span class="key">Space</span>
+                <span>Ascend &nbsp;&nbsp; <span class="key">Shift</span> Descend</span>
+            </div>
+            <div class="key-row">
+                <span>🖱️ Mouse to Look Around</span>
+            </div>
+            <div class="key-row">
+                <span>🌟 Collect Stars & Explore Stations</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <div id="canvas-container"></div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div id="crosshair"></div>
+
+        <div id="zone-indicator" style="cursor: pointer;" title="Click or press Enter to open">
+            <div id="zone-name">Deep Space</div>
+            <div id="zone-hint" class="press-enter-hint">Go to Web →</div>
+        </div>
+
+        <div id="minimap-container">
+            <canvas id="minimap"></canvas>
+        </div>
+
+        <div id="altitude-indicator">
+            <div id="altitude-value">0</div>
+            <div id="altitude-label">Altitude</div>
+        </div>
+
+        <div id="speed-indicator">
+            <div id="speed-bar">
+                <div id="speed-fill"></div>
+            </div>
+            <div id="speed-label">Velocity</div>
+        </div>
+
+        <div id="score-display">
+            <div id="score-value">0</div>
+            <div id="score-label">Stars: <span id="star-count">0</span>/50</div>
+        </div>
+
+        <div id="info-popup">
+            <h3 id="popup-title">Title</h3>
+            <p id="popup-content">Content</p>
+        </div>
+
+        <div id="controls-hint">
+            <div class="key-hint">
+                <span class="key">W</span><span class="key">S</span>
+            </div>
+            <div class="key-hint">
+                <span class="key">A</span><span class="key">D</span>
+            </div>
+            <div class="key-hint">
+                <span>Move • Mouse to Look • Space/Shift Up/Down</span>
+            </div>
+        </div>
+
+        <div id="mobile-controls">
+            <div id="joystick-zone">
+                <div id="joystick-knob"></div>
+            </div>
+            <div id="view-joystick-zone">
+                <div id="view-joystick-knob"></div>
+            </div>
+            <div id="vertical-controls">
+                <button class="vertical-btn" id="mobile-up">▲</button>
+                <button class="vertical-btn" id="mobile-down">▼</button>
+            </div>
+            <div id="mobile-actions">
+                <button class="mobile-btn" id="mobile-interact">⚡</button>
+            </div>
+        </div>
+
+        <div id="notification">
+            <h4 id="notification-title">Welcome!</h4>
+            <p id="notification-content">Explore and collect stars!</p>
+        </div>
+    </div>
+
+    <!-- Landscape Orientation Prompt -->
+    <div id="landscape-prompt">
+        <div class="prompt-icon">📱</div>
+        <div class="prompt-title">Rotate to Landscape</div>
+        <div class="prompt-text">For the best experience, please rotate your device to landscape mode.</div>
+        <button class="prompt-btn" id="continue-portrait">Continue Anyway</button>
+    </div>
+
+    <!-- Fullscreen Button -->
+    <button id="fullscreen-btn">⛶ Fullscreen</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
