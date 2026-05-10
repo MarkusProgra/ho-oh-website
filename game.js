@@ -42,14 +42,14 @@ const ZONE_DATA = [
         icon: '✨'
     },
     {
-        id: 'stockerse',
-        name: 'Stockerse Exchange',
+        id: 'pipoll',
+        name: 'Pipoll',
         title: 'The Human Stock Market',
-        description: 'Trade on individuals. Create your own stock.',
+        description: 'Track habits, build streaks, watch your value rise.',
         position: { x: 300, y: -60, z: -250 },
         radius: 60,
         color: 0x8c64e1,
-        url: 'https://apps.apple.com/app/stockerse/id6476563279',
+        url: 'https://pipoll.live',
         icon: '📈'
     },
     {
@@ -140,34 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.addEventListener('click', onStartClicked);
     }
 
-    // Landscape orientation prompt for mobile
-    const landscapePrompt = document.getElementById('landscape-prompt');
-    const continueBtn = document.getElementById('continue-portrait');
-
-    function checkOrientation() {
-        // Only show prompt on mobile in portrait mode
-        const isMobile = window.innerWidth <= 768;
-        const isPortrait = window.innerHeight > window.innerWidth;
-
-        if (isMobile && isPortrait && landscapePrompt) {
-            landscapePrompt.classList.add('active');
-        } else if (landscapePrompt) {
-            landscapePrompt.classList.remove('active');
-        }
-    }
-
-    // Check on load and resize
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', checkOrientation);
-
-    // Continue button
-    if (continueBtn && landscapePrompt) {
-        continueBtn.addEventListener('click', () => {
-            landscapePrompt.classList.remove('active');
-        });
-    }
-
     // Zone indicator click/tap to open web
     const zoneIndicator = document.getElementById('zone-indicator');
     if (zoneIndicator) {
@@ -177,29 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Deep space - go to main web
                 window.open('indexWeb.html', '_blank');
-            }
-        });
-    }
-
-    // Fullscreen button for mobile
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('Fullscreen denied:', err);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
-
-        // Update button state on fullscreen change
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                fullscreenBtn.textContent = '⛶ Exit Fullscreen';
-            } else {
-                fullscreenBtn.textContent = '⛶ Fullscreen';
             }
         });
     }
