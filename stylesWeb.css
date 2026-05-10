@@ -1,4 +1,4 @@
-/* ============================================
+==========================================
    HO OH LABS - Main Stylesheet
    Colors: #f89f44 (orange), #f15033 (red), black
    Font: Futura
@@ -1213,20 +1213,36 @@ img {
 
     .hero {
         padding: 100px 20px 40px;
+        min-height: 100vh;
+    }
+
+    .hero-logo-wrapper {
+        margin-bottom: 20px;
     }
 
     .hero-logo {
-        height: 100px;
+        height: auto;
+        width: 100%;
+        max-width: 400px;
+        filter: drop-shadow(0 0 20px rgba(248, 159, 68, 0.4));
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+        padding: 0 10px;
     }
 
     .hero-cta {
         flex-direction: column;
         align-items: center;
+        gap: 15px;
     }
 
     .btn {
         width: 100%;
         max-width: 280px;
+        padding: 14px 24px;
+        font-size: 14px;
     }
 
     .about,
@@ -1252,6 +1268,15 @@ img {
 @media (max-width: 480px) {
     .section-title {
         font-size: 32px;
+    }
+
+    .hero-logo {
+        max-width: 280px;
+    }
+
+    .hero-subtitle {
+        font-size: 14px;
+        line-height: 1.5;
     }
 
     .project-card {
