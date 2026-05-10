@@ -131,6 +131,11 @@
             display: block;
         }
 
+        /* Make zone indicator clickable */
+        #zone-indicator {
+            pointer-events: auto;
+        }
+
         #crosshair {
             position: absolute;
             top: 50%;
@@ -382,54 +387,6 @@
             display: none;
         }
 
-        /* Landscape orientation prompt */
-        #landscape-prompt {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 30px;
-        }
-
-        #landscape-prompt.active {
-            display: flex;
-        }
-
-        .prompt-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        .prompt-title {
-            font-size: 24px;
-            color: #f89f44;
-            margin-bottom: 15px;
-            letter-spacing: 0.1em;
-        }
-
-        .prompt-text {
-            color: #8888aa;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .prompt-btn {
-            margin-top: 25px;
-            padding: 15px 40px;
-            background: linear-gradient(135deg, #f89f44, #f15033);
-            color: #0a0a0a;
-            border: none;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
         /* Fullscreen button */
         #fullscreen-btn {
             position: fixed;
@@ -476,6 +433,37 @@
             letter-spacing: 0.15em;
             margin-top: 4px;
             opacity: 0.8;
+        }
+
+        /* Fullscreen button - desktop only */
+        #fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #f89f44, #f15033);
+            color: #0a0a0a;
+            border: none;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(248, 159, 68, 0.3);
+            transition: all 0.3s ease;
+            z-index: 200;
+            display: none;
+        }
+
+        #fullscreen-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(248, 159, 68, 0.5);
+        }
+
+        #fullscreen-btn.active {
+            display: block;
         }
 
         @media (max-width: 768px) {
@@ -569,24 +557,6 @@
             .vertical-btn:active {
                 background: rgba(248, 159, 68, 0.3);
             }
-            #mobile-actions {
-                position: absolute;
-                bottom: 250px;
-                right: 55px;
-            }
-            .mobile-btn {
-                width: 60px;
-                height: 60px;
-                background: rgba(255,255,255,0.1);
-                border: 2px solid rgba(248, 159, 68, 0.3);
-                border-radius: 50%;
-                color: #fff;
-                font-size: 22px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                pointer-events: auto;
-            }
             /* Mobile zone indicator styling */
             #zone-indicator {
                 top: 10px;
@@ -594,9 +564,9 @@
                 transform: translateX(-50%);
                 max-width: 90%;
             }
-            /* Show fullscreen button on mobile */
+            /* Hide fullscreen button on mobile */
             #fullscreen-btn {
-                display: block;
+                display: none !important;
             }
         }
     </style>
@@ -692,9 +662,6 @@
                 <button class="vertical-btn" id="mobile-up">▲</button>
                 <button class="vertical-btn" id="mobile-down">▼</button>
             </div>
-            <div id="mobile-actions">
-                <button class="mobile-btn" id="mobile-interact">⚡</button>
-            </div>
         </div>
 
         <div id="notification">
@@ -702,17 +669,6 @@
             <p id="notification-content">Explore and collect stars!</p>
         </div>
     </div>
-
-    <!-- Landscape Orientation Prompt -->
-    <div id="landscape-prompt">
-        <div class="prompt-icon">📱</div>
-        <div class="prompt-title">Rotate to Landscape</div>
-        <div class="prompt-text">For the best experience, please rotate your device to landscape mode.</div>
-        <button class="prompt-btn" id="continue-portrait">Continue Anyway</button>
-    </div>
-
-    <!-- Fullscreen Button -->
-    <button id="fullscreen-btn">⛶ Fullscreen</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="game.js"></script>
