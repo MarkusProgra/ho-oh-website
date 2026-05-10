@@ -1218,18 +1218,22 @@ img {
 
     .hero-logo-wrapper {
         margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .hero-logo {
         height: auto;
         width: 100%;
-        max-width: 400px;
+        max-width: 350px;
         filter: drop-shadow(0 0 20px rgba(248, 159, 68, 0.4));
     }
 
     .hero-subtitle {
         font-size: 16px;
         padding: 0 10px;
+        text-align: center;
     }
 
     .hero-cta {
